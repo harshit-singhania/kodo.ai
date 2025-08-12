@@ -1,0 +1,22 @@
+[project]
+name = "ai-code-reviewer"
+version = "0.1.0"
+description = "An AI-powered code review assistant"
+authors = [
+    {name = "Harshit"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi (>=0.116.1,<0.117.0)",
+    "uvicorn[standard] (>=0.35.0,<0.36.0)",
+    "celery (>=5.5.3,<6.0.0)",
+    "redis (>=6.4.0,<7.0.0)",
+    "uuid (>=1.30,<2.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+[tool.poetry.group.dev.dependencies]

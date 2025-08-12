@@ -1,0 +1,31 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # The Redis message broker
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+
+  # The FastAPI web server
+  api:
+    build: .
+    container_name: api
+    ports:
+      - "8000:80"  # Map port 8000 on your machine to port 80 in the container
+    volumes:
+      # Mount local code for live-reloading during development
+      - ./ai_code_reviewer:/app/ai_code_reviewer
+    depends_on:
+      - redis
+
+  # The Celery background worker
+  worker:
+    build: .
+    container_name: worker
+    # Override the default command to start the celery worker
+    command: ["/app/.venv/bin/celery", "-A", "ai_code_reviewer.worker.celery_app", "worker", "--loglevel=info"]
+    volumes:
+      - ./ai_code_reviewer:/app/ai_code_reviewer
+    depends_on:
+      - redis
