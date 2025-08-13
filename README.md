@@ -50,7 +50,7 @@ Follow these steps to get the project running on your local machine.
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/harshit-singhania/kodo.ai.git
 cd ai-code-reviewer
 ````
 
