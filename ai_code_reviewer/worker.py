@@ -41,20 +41,20 @@ def get_github_installation_token(repo_full_name: str) -> str:
         response.raise_for_status()
         return response.json()['token']
 
+# The task signature now accepts commit_id
 @celery_app.task
-def analyze_pull_request(repo_name: str, pr_id: int):
+def analyze_pull_request(repo_name: str, pr_id: int, commit_id: str):
     """
-    Fetches PR files and analyzes them for cyclomatic complexity.
+    Fetches PR files, analyzes them, and posts comments on high-complexity functions.
     """
-    print(f"✅ Starting analysis for {repo_name} PR #{pr_id}")
+    print(f"✅ Starting analysis for {repo_name} PR #{pr_id} on commit {commit_id[:7]}")
     try:
-        # Get an installation token to interact with the repository
         token = get_github_installation_token(repo_name)
         headers = {'Authorization': f'Bearer {token}', 'Accept': 'application/vnd.github.v3+json'}
 
-        # Get the list of files in the pull request
         pr_files_url = f'https://api.github.com/repos/{repo_name}/pulls/{pr_id}/files'
-        with httpx.Client() as client:
+        
+        with httpx.Client(follow_redirects=True) as client:
             response = client.get(pr_files_url, headers=headers)
             response.raise_for_status()
             files = response.json()
@@ -62,21 +62,38 @@ def analyze_pull_request(repo_name: str, pr_id: int):
             for file in files:
                 filename = file['filename']
                 if not filename.endswith('.py'):
-                    continue # Skip non-python files
+                    continue
 
                 print(f"  Analysing file: {filename}")
                 
-                # Download the file content
                 content_response = client.get(file['raw_url'], headers=headers)
                 content_response.raise_for_status()
                 code_content = content_response.text
 
-                # Analyze for cyclomatic complexity
                 visitor = ComplexityVisitor.from_code(code_content)
                 for function in visitor.functions:
-                    # We'll just print for now. Later we'll post this as a comment.
                     if function.complexity > 10:
-                        print(f"    ❗️ High complexity in function '{function.name}': {function.complexity} (line {function.lineno})")
+                        # --- THIS IS THE NEW COMMENTING LOGIC ---
+                        comment_body = (
+                            f"### Complexity Warning 🤖\n\n"
+                            f"Function `'{function.name}'` has a cyclomatic complexity of **{function.complexity}**. "
+                            f"Consider refactoring to keep complexity below 10 for better maintainability."
+                        )
+                        
+                        # The API endpoint for posting a review comment
+                        comments_url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_id}/comments"
+                        
+                        comment_payload = {
+                            "body": comment_body,
+                            "commit_id": commit_id,
+                            "path": filename,
+                            "line": function.lineno,
+                        }
+                        
+                        print(f"    Posting comment for function '{function.name}' on line {function.lineno}...")
+                        comment_response = client.post(comments_url, headers=headers, json=comment_payload)
+                        comment_response.raise_for_status()
+                        # --- END OF NEW LOGIC ---
         
         print(f"✅ Analysis finished for {repo_name} PR #{pr_id}")
 

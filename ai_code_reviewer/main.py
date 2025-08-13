@@ -1,13 +1,14 @@
 # ai_code_reviewer/main.py
 
-# --- START: Added Imports ---
+# 1. Standard library imports
 import hashlib
 import hmac
-# Note: We are expanding the import from fastapi
-from fastapi import FastAPI, Request, HTTPException, Header
-# --- END: Added Imports ---
 
-from .worker import dummy_analysis_task
+# 2. Third-party imports
+from fastapi import FastAPI, Request, HTTPException, Header
+
+# 3. Local application imports
+from .worker import analyze_pull_request
 from .settings import settings
 
 app = FastAPI(
@@ -26,9 +27,11 @@ async def health_check():
 @app.post("/analyze", tags=["Analysis"])
 async def analyze_repository(repo_name: str, pr_id: int):
     """
-    Triggers a background analysis task for a given repository and pull request.
+    Manually triggers a background analysis task for a given repository and PR.
+    This is useful for debugging.
     """
-    task = dummy_analysis_task.delay(repo_name=repo_name, pr_id=pr_id)
+    # FIXED: This now correctly calls our real analysis task.
+    task = analyze_pull_request.delay(repo_name=repo_name, pr_id=pr_id)
     return {"message": "Analysis has been queued.", "task_id": task.id}
 
 @app.post("/api/webhook", tags=["GitHub"])
@@ -39,7 +42,7 @@ async def github_webhook(
     """
     Receives, verifies, and processes webhook events from GitHub.
     """
-    # --- This part is the same: signature verification ---
+    # --- Signature verification ---
     if not x_hub_signature_256:
         raise HTTPException(status_code=401, detail="X-Hub-Signature-256 header is missing!")
 
@@ -50,7 +53,7 @@ async def github_webhook(
     if not hmac.compare_digest(expected_signature, x_hub_signature_256):
         raise HTTPException(status_code=403, detail="Request signature does not match!")
 
-    # --- This is the new logic: parse the payload and trigger the task ---
+    # --- Parse payload and trigger task ---
     payload_json = await request.json()
     event_type = request.headers.get("X-GitHub-Event")
 
@@ -60,11 +63,17 @@ async def github_webhook(
         if action in ["opened", "synchronize"]:
             repo_name = payload_json["repository"]["full_name"]
             pr_number = payload_json["number"]
+            # Get the specific commit SHA for the PR's head
+            commit_id = payload_json["pull_request"]["head"]["sha"]
 
             print(f"✅ Valid PR event received: '{action}' on {repo_name} #{pr_number}")
             print("🚀 Triggering background analysis task...")
 
-            # This is where we call our Celery task with real data!
-            dummy_analysis_task.delay(repo_name=repo_name, pr_id=pr_number)
+            # Pass the new commit_id to the task
+            analyze_pull_request.delay(
+                repo_name=repo_name,
+                pr_id=pr_number,
+                commit_id=commit_id
+            )
 
     return {"status": "success"}
