@@ -12,7 +12,7 @@ from .worker import analyze_pull_request
 from .settings import settings
 
 app = FastAPI(
-    title="AI Code Review Assistant",
+    title="Kodo.ai",
     description="An intelligent system that automatically detects bugs and suggests improvements.",
     version="0.1.0",
 )

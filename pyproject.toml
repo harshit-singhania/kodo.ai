@@ -1,5 +1,5 @@
 [project]
-name = "ai-code-reviewer"
+name = "kodo.ai"
 version = "0.1.0"
 description = "An AI-powered code review assistant"
 authors = [
