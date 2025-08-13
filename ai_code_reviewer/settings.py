@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     GITHUB_APP_ID: str
     GITHUB_WEBHOOK_SECRET: str
+    GITHUB_PRIVATE_KEY_BASE64: str
 
 # Create a single, reusable instance of the settings
 settings = Settings()

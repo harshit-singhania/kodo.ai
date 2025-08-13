@@ -38,3 +38,5 @@ poetry.lock
 .DS_Store
 
 .env
+
+ai-code-reviewer-development.2025-08-12.private-key.pem
