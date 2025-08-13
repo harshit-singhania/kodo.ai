@@ -1,5 +1,5 @@
 [project]
-name = "kodo.ai"
+name = "ai-code-reviewer"
 version = "0.1.0"
 description = "An AI-powered code review assistant"
 authors = [
@@ -17,11 +17,16 @@ dependencies = [
     "httpx (>=0.28.1,<0.29.0)",
     "pyjwt (>=2.10.1,<3.0.0)",
     "cryptography (>=45.0.6,<46.0.0)",
-    "radon (>=6.0.1,<7.0.0)"
+    "radon (>=6.0.1,<7.0.0)",
+    "bandit (>=1.8.6,<2.0.0)",
+    "flake8 (>=7.3.0,<8.0.0)",
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
 [tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+
