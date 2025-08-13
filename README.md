@@ -101,6 +101,16 @@ Create a `.env` file for your secrets. We provide an example file to make this e
     cat github-private-key.pem | base64 -w 0
     ```
 
+    On Windows (PowerShell):
+
+    ```powershell
+    # Copies base64 to clipboard
+    [Convert]::ToBase64String([IO.File]::ReadAllBytes("github-private-key.pem")) | Set-Clipboard
+
+    # If Set-Clipboard isn't available, write to a file instead:
+    [Convert]::ToBase64String([IO.File]::ReadAllBytes("github-private-key.pem")) > key.b64
+    ```
+
 ### 5\. Run the Application
 
 1.  **Start ngrok**: Open a new terminal window and run the following to expose your local port 8000.
@@ -110,6 +120,11 @@ Create a `.env` file for your secrets. We provide an example file to make this e
     ```
 
     Copy the `https://...` forwarding URL it gives you.
+
+    Windows notes:
+    - Run commands in Windows Terminal (PowerShell). If using WSL, run everything inside your Linux distro shell.
+    - After installing Docker Desktop, sign in and start it once before running `docker compose up`.
+
 
 2.  **Update Webhook URL**: Go to your GitHub App's settings, and paste the ngrok forwarding URL into the "Webhook URL" field. Add `/api/webhook` to the end.
 
