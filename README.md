@@ -39,28 +39,88 @@ The system is built with a modern Python backend and operates in an event-driven
 
 Follow these steps to get the project running on your local machine.
 
-### Prerequisites
+## 🚀 Installation Options
 
-- [Git](https://git-scm.com/)
-- [Python 3.10+](https://www.python.org/)
-- [Poetry](https://python-poetry.org/) for dependency management
-- [Docker](https://www.docker.com/) & [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [ngrok](https://ngrok.com/download) for receiving webhooks locally
+Pick one of the following setups.
 
-### 1. Clone the Repository
+### Option A — Docker (recommended; no local Python needed)
+- Prerequisites: Docker Desktop, ngrok, Git
+- Steps:
+  1. Clone:
+     ```bash
+     git clone https://github.com/harshit-singhania/kodo.ai.git
+     cd ai-code-reviewer
+     ```
+  2. Create environment file:
+     ```bash
+     cp .env.example .env
+     ```
+     Fill values in `.env` (see “Configure Environment Variables” below).
+  3. Launch:
+     ```bash
+     docker compose up --build
+     ```
+  4. Start ngrok:
+     ```bash
+     ngrok http 8000
+     ```
+  5. Set your GitHub App webhook URL to: https://<ngrok-forwarding-url>/api/webhook
 
-```bash
-git clone https://github.com/harshit-singhania/kodo.ai.git
-cd ai-code-reviewer
-````
+### Option B — Linux (native dev)
+- Prerequisites: Python 3.10+, Git, ngrok
+- Steps:
+  1. Install Poetry:
+     ```bash
+     python3 -m pip install --user pipx || true
+     pipx install poetry || python3 -m pip install --user poetry
+     ```
+  2. Clone and install deps:
+     ```bash
+     git clone https://github.com/harshit-singhania/kodo.ai.git
+     cd ai-code-reviewer
+     poetry install
+     ```
+  3. Create `.env` and fill values (see “Configure Environment Variables” below).
+  4. Recommended run method: use Docker Compose (Option A) to run services consistently.
 
-### 2\. Install Python Dependencies
+### Option C — macOS (native dev)
+- Prerequisites: Python 3.10+, Git, ngrok, Homebrew (optional)
+- Steps:
+  1. Install Python (via Homebrew, optional):
+     ```bash
+     brew install python
+     ```
+  2. Install Poetry:
+     ```bash
+     pipx install poetry || pip3 install --user poetry
+     ```
+  3. Clone and install deps:
+     ```bash
+     git clone https://github.com/harshit-singhania/kodo.ai.git
+     cd ai-code-reviewer
+     poetry install
+     ```
+  4. Create `.env` and fill values (see “Configure Environment Variables” below).
+  5. Recommended run method: use Docker Compose (Option A).
 
-Poetry will install all project dependencies into a virtual environment.
+### Option D — Windows (native dev)
+- Prerequisites: Python 3.10+ (Add to PATH), Git, ngrok
+- Steps (PowerShell):
+  1. Install Poetry:
+     ```powershell
+     pipx install poetry; if ($LASTEXITCODE) { py -m pip install --user poetry }
+     ```
+  2. Clone and install deps:
+     ```powershell
+     git clone https://github.com/harshit-singhania/kodo.ai.git
+     cd ai-code-reviewer
+     poetry install
+     ```
+  3. Create `.env` and fill values (see “Configure Environment Variables” below).
+  4. Recommended run method: use Docker Compose (Option A).
 
-```bash
-poetry install
-```
+Note:
+- Native runs for API + worker require Redis and matching broker URLs. The Docker option handles this automatically and is the supported path for running the full stack.
 
 ### 3\. Set Up the GitHub App
 
